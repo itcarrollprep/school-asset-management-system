@@ -1,0 +1,72 @@
+CREATE DATABASE IF NOT EXISTS asset_db;
+USE asset_db;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    role ENUM('admin', 'staff', 'viewer') DEFAULT 'staff',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Initial admin user (password: admin123 hashed with bcrypt)
+INSERT INTO users (username, password, full_name, role) VALUES 
+('admin', '$2b$10$rF3zbB8y7FvcObQizGeLXO2/Ca853iHHwUeXKtqWUFcxOPLMqQSQK', 'System Administrator', 'admin');
+
+CREATE TABLE IF NOT EXISTS locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS owners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    department VARCHAR(255),
+    email VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    category ENUM('Asset IT', 'Asset School', 'Asset Garden', 'Asset Event', 'Asset Office', 'Asset Principal and Director') NOT NULL,
+    status ENUM('Available', 'Borrow', 'maintenance', 'End of Life', 'Pending Disposal') DEFAULT 'Available',
+    location VARCHAR(255),
+    asset_tag VARCHAR(100),
+    owner VARCHAR(255),
+    start_date DATE,
+    warranty_date DATE,
+    status_symbol VARCHAR(50) DEFAULT 'Circle',
+    is_locked BOOLEAN DEFAULT 0
+);
+
+INSERT INTO locations (name, description) VALUES
+('IT Lab', 'Main computer lab for students'),
+('Science Room', 'Laboratory for physics and chemistry'),
+('Main Field', 'Outdoor sports and events area'),
+('Principal Office', 'Executive office section'),
+('Garden Shed', 'Storage for landscape tools');
+
+INSERT INTO owners (name, department, email) VALUES
+('Somchai IT', 'IT Department', 'somchai@school.com'),
+('Dr. Somsak', 'Science Faculty', 'somsak@school.com'),
+('Manager Anne', 'Events', 'anne@school.com'),
+('Director Jane', 'Administration', 'jane@school.com');
+
+CREATE TABLE IF NOT EXISTS maintenance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    maintenance_type ENUM('Repair', 'Cleaning', 'Upgrade', 'Inspection') NOT NULL,
+    description TEXT,
+    cost DECIMAL(10, 2),
+    maintenance_date DATE,
+    completion_date DATE,
+    status ENUM('Pending', 'In Progress', 'Completed') DEFAULT 'Pending',
+    provider VARCHAR(255)
+);
+
+INSERT INTO maintenance (item_id, maintenance_type, description, cost, maintenance_date, status, provider) VALUES
+(1, 'Repair', 'Screen flickering issue', 150.00, '2024-03-10', 'In Progress', 'FixIT Services'),
+(2, 'Cleaning', 'Annual lens cleaning', 50.00, '2024-02-15', 'Completed', 'LabCare'),
+(5, 'Upgrade', 'Battery replacement', 80.00, '2024-03-12', 'Pending', 'GardenFix');
