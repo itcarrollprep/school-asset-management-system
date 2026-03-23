@@ -17,6 +17,7 @@ INSERT INTO users (username, password, full_name, role) VALUES
 CREATE TABLE IF NOT EXISTS locations (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) DEFAULT 'Room',
     description TEXT
 );
 
@@ -70,3 +71,22 @@ INSERT INTO maintenance (item_id, maintenance_type, description, cost, maintenan
 (1, 'Repair', 'Screen flickering issue', 150.00, '2024-03-10', 'In Progress', 'FixIT Services'),
 (2, 'Cleaning', 'Annual lens cleaning', 50.00, '2024-02-15', 'Completed', 'LabCare'),
 (5, 'Upgrade', 'Battery replacement', 80.00, '2024-03-12', 'Pending', 'GardenFix');
+
+CREATE TABLE IF NOT EXISTS software (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    version VARCHAR(100),
+    vendor VARCHAR(255),
+    license_key VARCHAR(255),
+    license_type ENUM('Perpetual', 'Subscription', 'Open Source', 'Trial', 'Other') DEFAULT 'Perpetual',
+    cost DECIMAL(10, 2) DEFAULT 0,
+    billing_period ENUM('Monthly', 'Yearly', 'One-time', 'Free') DEFAULT 'Yearly',
+    install_date DATE,
+    expiry_date DATE,
+    assigned_to VARCHAR(255),
+    location VARCHAR(255),
+    status ENUM('Active', 'Expired', 'Unassigned') DEFAULT 'Active',
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

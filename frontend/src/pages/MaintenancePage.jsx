@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 
 export default function MaintenancePage() {
   const { t } = useTranslation();
+  const currentUser = JSON.parse(localStorage.getItem('user_info') || '{}');
+  const isViewer = currentUser?.role === 'viewer';
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'history'
@@ -178,7 +180,11 @@ export default function MaintenancePage() {
     }
 
     return (
-      <div onClick={() => handleUpdateStatus(record.id, status)} title="Click to change status">
+      <div
+        onClick={!isViewer ? () => handleUpdateStatus(record.id, status) : undefined}
+        title={isViewer ? '' : 'Click to change status'}
+        className={isViewer ? '' : 'cursor-pointer'}
+      >
         {content}
       </div>
     );
@@ -201,13 +207,15 @@ export default function MaintenancePage() {
         </div>
         <div className="flex space-x-3">
           <button onClick={fetchMaintenance} className="p-2 border border-gray-200 rounded hover:bg-gray-50 transition shadow-sm"><RotateCcw className="w-5 h-5 text-gray-400" /></button>
-          <button 
-            onClick={handleScheduleService}
-            className="flex items-center px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold shadow-lg transition transform hover:scale-105"
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            {t('maintenance.schedule_button')}
-          </button>
+          {!isViewer && (
+            <button 
+              onClick={handleScheduleService}
+              className="flex items-center px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-bold shadow-lg transition transform hover:scale-105"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              {t('maintenance.schedule_button')}
+            </button>
+          )}
         </div>
       </div>
 

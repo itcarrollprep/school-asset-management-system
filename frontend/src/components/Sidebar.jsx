@@ -8,7 +8,8 @@ import {
   BarChart3, 
   Settings,
   Globe,
-  LogOut
+  LogOut,
+  MonitorSmartphone
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +21,8 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
     i18n.changeLanguage(newLang);
   };
 
+  const isAdmin = user?.role === 'admin';
+
   const menuItems = [
     { id: 'dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
     { id: 'assets', label: t('nav.assets'), icon: Package },
@@ -27,7 +30,10 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
     { id: 'locations', label: t('nav.locations'), icon: MapPin },
     { id: 'people', label: t('nav.people'), icon: Users },
     { id: 'reports', label: t('nav.reports'), icon: BarChart3 },
-    { id: 'settings', label: t('nav.settings'), icon: Settings },
+    ...(isAdmin ? [
+      { id: 'software', label: 'Software', icon: MonitorSmartphone },
+      { id: 'settings', label: t('nav.settings'), icon: Settings },
+    ] : []),
   ];
 
   return (

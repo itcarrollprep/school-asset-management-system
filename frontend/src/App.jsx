@@ -7,6 +7,7 @@ import AssetsPage from './pages/AssetsPage';
 import MaintenancePage from './pages/MaintenancePage';
 import LocationsPage from './pages/LocationsPage';
 import UsersPage from './pages/UsersPage';
+import SoftwarePage from './pages/SoftwarePage';
 import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 import AssetDetailView from './components/AssetDetailView';
@@ -111,6 +112,7 @@ function App() {
       case 'maintenance': return <MaintenancePage />;
       case 'locations': return <LocationsPage />;
       case 'people': return <UsersPage />;
+      case 'software': return <SoftwarePage />;
       case 'reports': return <div className="p-8"><h1 className="text-2xl font-bold">Reports Page coming soon...</h1></div>;
       case 'settings': return <SettingsPage />;
       default: return <DashboardPage />;

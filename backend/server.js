@@ -246,6 +246,34 @@ app.post('/api/locations', verifyToken, (req, res) => {
   });
 });
 
+app.put('/api/locations/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { name, type } = req.body;
+  if (!name) return res.status(400).json({ error: 'Location name is required' });
+
+  // Also update items that reference the old location name
+  pool.query('SELECT name FROM locations WHERE id = ?', [id], (err, results) => {
+    if (err || results.length === 0) return res.status(404).json({ error: 'Location not found' });
+    const oldName = results[0].name;
+
+    pool.query('UPDATE locations SET name=?, type=? WHERE id=?', [name, type || 'Room', id], (err2) => {
+      if (err2) return res.status(500).json({ error: 'Database error updating location' });
+      // Cascade name change to items
+      pool.query('UPDATE items SET location=? WHERE location=?', [name, oldName], () => {});
+      res.json({ message: 'Location updated successfully', id, name, type });
+    });
+  });
+});
+
+app.delete('/api/locations/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  pool.query('DELETE FROM locations WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error deleting location' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Location not found' });
+    res.json({ message: 'Location deleted successfully', id });
+  });
+});
+
 // Owners API
 app.get('/api/owners', (req, res) => {
   const query = `
@@ -267,6 +295,34 @@ app.post('/api/owners', verifyToken, (req, res) => {
   pool.query(query, [name, department || 'General'], (err, result) => {
     if (err) return res.status(500).json({ error: 'Database error creating owner' });
     res.status(201).json({ id: result.insertId, name, department: department || 'General' });
+  });
+});
+
+app.put('/api/owners/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { name, department } = req.body;
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+
+  // Also update items that reference the old owner name
+  pool.query('SELECT name FROM owners WHERE id = ?', [id], (err, results) => {
+    if (err || results.length === 0) return res.status(404).json({ error: 'Owner not found' });
+    const oldName = results[0].name;
+
+    pool.query('UPDATE owners SET name=?, department=? WHERE id=?', [name, department || 'General', id], (err2) => {
+      if (err2) return res.status(500).json({ error: 'Database error updating owner' });
+      // Cascade name change to items
+      pool.query('UPDATE items SET owner=? WHERE owner=?', [name, oldName], () => {});
+      res.json({ message: 'Owner updated successfully', id, name, department });
+    });
+  });
+});
+
+app.delete('/api/owners/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  pool.query('DELETE FROM owners WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error deleting owner' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Owner not found' });
+    res.json({ message: 'Owner deleted successfully', id });
   });
 });
 
@@ -420,6 +476,55 @@ app.patch('/api/users/:id/password', verifyToken, async (req, res) => {
   }
 });
 
+// Software API
+app.get('/api/software', (req, res) => {
+  pool.query('SELECT * FROM software ORDER BY id DESC', (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error fetching software' });
+    res.json(results);
+  });
+});
+
+app.post('/api/software', verifyToken, (req, res) => {
+  const { name, version, vendor, license_key, license_type, cost, billing_period, install_date, expiry_date, assigned_to, location, status, notes } = req.body;
+  if (!name) return res.status(400).json({ error: 'Software name is required' });
+
+  const query = `INSERT INTO software (name, version, vendor, license_key, license_type, cost, billing_period, install_date, expiry_date, assigned_to, location, status, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const params = [name, version, vendor, license_key, license_type || 'Perpetual', cost || 0, billing_period || 'Yearly',
+    install_date || null, expiry_date || null, assigned_to, location, status || 'Active', notes];
+
+  pool.query(query, params, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error creating software' });
+    res.status(201).json({ id: result.insertId, name });
+  });
+});
+
+app.put('/api/software/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { name, version, vendor, license_key, license_type, cost, billing_period, install_date, expiry_date, assigned_to, location, status, notes } = req.body;
+  if (!name) return res.status(400).json({ error: 'Software name is required' });
+
+  const query = `UPDATE software SET name=?, version=?, vendor=?, license_key=?, license_type=?, cost=?, billing_period=?,
+    install_date=?, expiry_date=?, assigned_to=?, location=?, status=?, notes=? WHERE id=?`;
+  const params = [name, version, vendor, license_key, license_type, cost || 0, billing_period,
+    install_date || null, expiry_date || null, assigned_to, location, status, notes, id];
+
+  pool.query(query, params, (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error updating software' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Software not found' });
+    res.json({ message: 'Software updated successfully', id });
+  });
+});
+
+app.delete('/api/software/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  pool.query('DELETE FROM software WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ error: 'Database error deleting software' });
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Software not found' });
+    res.json({ message: 'Software deleted successfully', id });
+  });
+});
+
 // Server Info API
 app.get('/api/server-info', (req, res) => {
   const networkInterfaces = os.networkInterfaces();
@@ -441,3 +546,4 @@ app.get('/api/server-info', (req, res) => {
 app.listen(port, () => {
   console.log(`Backend server is running on http://localhost:${port}`);
 });
+

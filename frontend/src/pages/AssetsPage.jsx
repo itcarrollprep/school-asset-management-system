@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
 
 export default function AssetsPage({ renderStatus, initialViewAssetId }) {
   const { t } = useTranslation();
+  const currentUser = JSON.parse(localStorage.getItem('user_info') || '{}');
+  const isViewer = currentUser?.role === 'viewer';
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -247,16 +249,18 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
           </button>
         </div>
 
-        <button 
-          onClick={() => {
-            setEditingItem(null);
-            setIsModalOpen(true);
-          }}
-          className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg transition transform hover:scale-105 active:scale-95 whitespace-nowrap uppercase tracking-wide"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          {t('assets.add_button')}
-        </button>
+        {!isViewer && (
+          <button 
+            onClick={() => {
+              setEditingItem(null);
+              setIsModalOpen(true);
+            }}
+            className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg transition transform hover:scale-105 active:scale-95 whitespace-nowrap uppercase tracking-wide"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            {t('assets.add_button')}
+          </button>
+        )}
       </div>
 
       <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-xl">
@@ -338,36 +342,38 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
                     </div>
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end space-x-2">
-                       <button 
-                        onClick={() => toggleLock(item.id, item.is_locked)}
-                        className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50 border-transparent'}`}
-                        title={item.is_locked ? 'Unlock Asset' : 'Lock Asset'}
-                      >
-                        {item.is_locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
-                      </button>
+                    {!isViewer && (
+                      <div className="flex items-center justify-end space-x-2">
+                        <button 
+                          onClick={() => toggleLock(item.id, item.is_locked)}
+                          className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-yellow-600 bg-yellow-50 border-yellow-100' : 'text-gray-400 hover:text-blue-600 hover:bg-blue-50 border-transparent'}`}
+                          title={item.is_locked ? 'Unlock Asset' : 'Lock Asset'}
+                        >
+                          {item.is_locked ? <Lock className="w-4 h-4" /> : <Unlock className="w-4 h-4" />}
+                        </button>
 
-                      <button 
-                        disabled={item.is_locked}
-                        onClick={() => {
-                          setEditingItem(item);
-                          setIsModalOpen(true);
-                        }} 
-                        className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-gray-300 cursor-not-allowed border-transparent' : 'text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-transparent hover:border-blue-100'}`}
-                        title="Edit Asset"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
+                        <button 
+                          disabled={item.is_locked}
+                          onClick={() => {
+                            setEditingItem(item);
+                            setIsModalOpen(true);
+                          }} 
+                          className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-gray-300 cursor-not-allowed border-transparent' : 'text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-transparent hover:border-blue-100'}`}
+                          title="Edit Asset"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
 
-                      <button 
-                        disabled={item.is_locked}
-                        onClick={() => handleDelete(item.id)} 
-                        className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-gray-300 cursor-not-allowed border-transparent' : 'text-red-400 hover:text-red-600 hover:bg-red-50 border-transparent hover:border-red-100'}`}
-                        title="Delete Asset"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                        <button 
+                          disabled={item.is_locked}
+                          onClick={() => handleDelete(item.id)} 
+                          className={`p-2 rounded-lg transition-colors border ${item.is_locked ? 'text-gray-300 cursor-not-allowed border-transparent' : 'text-red-400 hover:text-red-600 hover:bg-red-50 border-transparent hover:border-red-100'}`}
+                          title="Delete Asset"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))
