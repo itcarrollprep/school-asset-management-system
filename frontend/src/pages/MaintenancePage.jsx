@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Wrench, CheckCircle, Clock, AlertCircle, Plus, RotateCcw } from 'lucide-react';
+﻿import React, { useState, useEffect } from 'react';
+import { Wrench, CheckCircle, Clock, AlertCircle, Plus, RotateCcw, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Swal from 'sweetalert2';
 
@@ -63,7 +63,12 @@ export default function MaintenancePage() {
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Service Type</label>
-            <input id="swal-m-type" class="swal2-input w-full m-0 text-sm" placeholder="e.g. Repair, Cleaning, Upgrade">
+            <select id="swal-m-type" class="swal2-select w-full m-0 text-sm">
+              <option value="Repair">Repair</option>
+              <option value="Cleaning">Cleaning</option>
+              <option value="Upgrade">Upgrade</option>
+              <option value="Inspection">Inspection</option>
+            </select>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
@@ -119,6 +124,85 @@ export default function MaintenancePage() {
         .then(data => {
           if (data.error) throw new Error(data.error);
           Swal.fire('Success', 'Maintenance scheduled successfully. Asset status updated to "maintenance".', 'success');
+          fetchMaintenance();
+          fetchAssets();
+        })
+        .catch(err => Swal.fire('Error', err.message, 'error'));
+      }
+    });
+  };
+
+  const handleEditMaintenance = (record) => {
+    Swal.fire({
+      title: 'Edit Maintenance',
+      html: `
+        <div class="text-left space-y-4 font-sans p-2">
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Service Type</label>
+            <select id="swal-e-type" class="swal2-select w-full m-0 text-sm">
+              <option value="Repair" ${record.maintenance_type === 'Repair' ? 'selected' : ''}>Repair</option>
+              <option value="Cleaning" ${record.maintenance_type === 'Cleaning' ? 'selected' : ''}>Cleaning</option>
+              <option value="Upgrade" ${record.maintenance_type === 'Upgrade' ? 'selected' : ''}>Upgrade</option>
+              <option value="Inspection" ${record.maintenance_type === 'Inspection' ? 'selected' : ''}>Inspection</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Date</label>
+              <input id="swal-e-date" type="date" class="swal2-input w-full m-0 text-sm" value="${record.maintenance_date ? record.maintenance_date.split('T')[0] : ''}">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Cost (฿)</label>
+              <input id="swal-e-cost" type="number" class="swal2-input w-full m-0 text-sm" value="${record.cost || 0}">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Provider</label>
+            <input id="swal-e-provider" class="swal2-input w-full m-0 text-sm" value="${record.provider || ''}">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Status</label>
+            <select id="swal-e-status" class="swal2-select w-full m-0 text-sm">
+              <option value="Pending" ${record.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="In Progress" ${record.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+              <option value="Completed" ${record.status === 'Completed' ? 'selected' : ''}>Completed</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Description</label>
+            <textarea id="swal-e-desc" class="swal2-textarea w-full m-0 text-sm h-24">${record.description || ''}</textarea>
+          </div>
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Save Changes',
+      confirmButtonColor: '#ea580c',
+      preConfirm: () => {
+        const maintenance_date = document.getElementById('swal-e-date').value;
+        if (!maintenance_date) { Swal.showValidationMessage('Date is required'); return false; }
+        return {
+          maintenance_type: document.getElementById('swal-e-type').value,
+          maintenance_date,
+          cost: document.getElementById('swal-e-cost').value,
+          provider: document.getElementById('swal-e-provider').value,
+          status: document.getElementById('swal-e-status').value,
+          description: document.getElementById('swal-e-desc').value,
+        };
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('auth_token');
+        const backendUrl = `http://${window.location.hostname}:4001`;
+        fetch(`${backendUrl}/api/maintenance/${record.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify(result.value)
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) throw new Error(data.error);
+          Swal.fire('Updated', 'Maintenance record updated successfully.', 'success');
           fetchMaintenance();
           fetchAssets();
         })
@@ -278,7 +362,18 @@ export default function MaintenancePage() {
                     </div>
                   </div>
                   
-                  <button className="px-4 py-2 text-xs font-bold border border-gray-200 rounded-lg hover:bg-gray-50 transition uppercase">{t('maintenance.view_log')}</button>
+                  <div className="flex items-center space-x-2">
+                     {!isViewer && (
+                       <button
+                         onClick={() => handleEditMaintenance(record)}
+                         className="p-2 text-xs font-bold border border-orange-200 text-orange-600 rounded-lg hover:bg-orange-50 transition"
+                         title="Edit"
+                       >
+                         <Pencil className="w-4 h-4" />
+                       </button>
+                     )}
+                     <button className="px-4 py-2 text-xs font-bold border border-gray-200 rounded-lg hover:bg-gray-50 transition uppercase">{t('maintenance.view_log')}</button>
+                   </div>
                </div>
             </div>
           ))
@@ -287,3 +382,4 @@ export default function MaintenancePage() {
     </div>
   );
 }
+

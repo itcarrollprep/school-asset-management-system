@@ -103,20 +103,20 @@ app.get('/api/items/:id', (req, res) => {
 
 // POST endpoint to add a new item
 app.post('/api/items', verifyToken, (req, res) => {
-  const { name, category, status, location, asset_tag, owner, start_date, warranty_date, status_symbol } = req.body;
+  const { name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
   const initialStatus = status || 'Available';
   
   // Sanitize dates
   const sDate = start_date || null;
   const wDate = warranty_date || null;
 
-  const query = 'INSERT INTO items (name, category, status, location, asset_tag, owner, start_date, warranty_date, status_symbol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  pool.query(query, [name, category, initialStatus, location, asset_tag, owner, sDate, wDate, status_symbol || 'Circle'], (err, result) => {
+  const query = 'INSERT INTO items (name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  pool.query(query, [name, category, initialStatus, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle'], (err, result) => {
     if (err) {
       console.error('Error adding item:', err);
       return res.status(500).json({ error: 'Database error adding item' });
     }
-    res.status(201).json({ id: result.insertId, name, category, status: initialStatus, location, asset_tag, owner, start_date: sDate, warranty_date: wDate, status_symbol });
+    res.status(201).json({ id: result.insertId, name, category, status: initialStatus, location, asset_tag, serial_number, owner, start_date: sDate, warranty_date: wDate, status_symbol });
   });
 });
 
@@ -160,7 +160,7 @@ app.patch('/api/items/:id/status', verifyToken, (req, res) => {
 // PUT endpoint to update entire item
 app.put('/api/items/:id', verifyToken, (req, res) => {
   const { id } = req.params;
-  const { name, category, status, location, asset_tag, owner, start_date, warranty_date, status_symbol } = req.body;
+  const { name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
   
   // Sanitize dates
   const sDate = start_date || null;
@@ -168,10 +168,10 @@ app.put('/api/items/:id', verifyToken, (req, res) => {
 
   const query = `
     UPDATE items 
-    SET name=?, category=?, status=?, location=?, asset_tag=?, owner=?, start_date=?, warranty_date=?, status_symbol=? 
+    SET name=?, category=?, status=?, location=?, asset_tag=?, serial_number=?, owner=?, start_date=?, warranty_date=?, status_symbol=? 
     WHERE id=? AND is_locked = 0
   `;
-  const params = [name, category, status, location, asset_tag, owner, sDate, wDate, status_symbol || 'Circle', id];
+  const params = [name, category, status, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle', id];
   
   pool.query(query, params, (err, result) => {
     if (err) {
@@ -397,6 +397,74 @@ app.patch('/api/maintenance/:id/status', verifyToken, (req, res) => {
         });
       }
     });
+  });
+});
+
+app.put('/api/maintenance/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { maintenance_type, maintenance_date, description, cost, provider, status } = req.body;
+  if (!maintenance_date) return res.status(400).json({ error: 'Date is required' });
+
+  const query = `
+    UPDATE maintenance 
+    SET maintenance_type=?, maintenance_date=?, description=?, cost=?, provider=?, status=?
+    WHERE id=?
+  `;
+  const params = [maintenance_type || 'Repair', maintenance_date, description, cost || 0, provider, status || 'Pending', id];
+
+  pool.query(query, params, (err, result) => {
+    if (err) {
+      logError('Error updating maintenance', err);
+      return res.status(500).json({ error: 'Database error updating maintenance' });
+    }
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Maintenance record not found' });
+
+    // Sync asset status based on new maintenance status
+    pool.query('SELECT item_id FROM maintenance WHERE id = ?', [id], (err2, rows) => {
+      if (!err2 && rows.length > 0) {
+        const item_id = rows[0].item_id;
+        const assetStatus = status === 'Completed' ? 'Available' : 'maintenance';
+        pool.query('UPDATE items SET status = ? WHERE id = ?', [assetStatus, item_id], () => {});
+      }
+    });
+
+    res.json({ message: 'Maintenance updated successfully', id });
+  });
+});
+// Dashboard Activity API
+app.get('/api/dashboard-activity', (req, res) => {
+  const query = `
+    (
+      SELECT 'New Asset' as type, name as title, CONCAT('Registered to ', IFNULL(location, 'Unknown')) as description, id as sort_key, 'blue' as color
+      FROM items ORDER BY id DESC LIMIT 5
+    )
+    UNION
+    (
+      SELECT 'Maintenance' as type, i.name as title, CONCAT(m.maintenance_type, ' by ', IFNULL(m.provider, 'Unknown')) as description, (m.id + 100000) as sort_key, 'orange' as color
+      FROM maintenance m JOIN items i ON m.item_id = i.id ORDER BY m.id DESC LIMIT 5
+    )
+    ORDER BY sort_key DESC
+    LIMIT 5
+  `;
+  pool.query(query, (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error fetching activity' });
+    res.json(results);
+  });
+});
+
+// Dashboard Warranty Alerts API
+app.get('/api/dashboard-alerts', (req, res) => {
+  const query = `
+    SELECT id, name, asset_tag, warranty_date, DATEDIFF(warranty_date, CURDATE()) as days_left
+    FROM items 
+    WHERE warranty_date IS NOT NULL AND status != 'End of Life' AND status != 'Pending Disposal'
+    AND DATEDIFF(warranty_date, CURDATE()) <= 30
+    ORDER BY days_left ASC
+    LIMIT 5
+  `;
+  pool.query(query, (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error fetching alerts' });
+    res.json(results);
   });
 });
 

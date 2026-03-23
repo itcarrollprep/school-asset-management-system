@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, MapPin, Tag, Calendar, Info } from 'lucide-react';
+import { X, User, MapPin, Tag, Calendar, Info, Hash } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
@@ -9,6 +9,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
   const [status, setStatus] = useState('Available');
   const [location, setLocation] = useState('');
   const [assetTag, setAssetTag] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
   const [owner, setOwner] = useState('');
   const [startDate, setStartDate] = useState('');
   const [warrantyDate, setWarrantyDate] = useState('');
@@ -44,6 +45,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       setStatus(editingItem.status || 'Available');
       setLocation(editingItem.location || '');
       setAssetTag(editingItem.asset_tag || '');
+      setSerialNumber(editingItem.serial_number || '');
       setOwner(editingItem.owner || '');
       setStartDate(editingItem.start_date ? new Date(editingItem.start_date).toISOString().split('T')[0] : '');
       setWarrantyDate(editingItem.warranty_date ? new Date(editingItem.warranty_date).toISOString().split('T')[0] : '');
@@ -53,6 +55,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       setStatus('Available');
       setLocation('');
       setAssetTag('');
+      setSerialNumber('');
       setOwner('');
       setStartDate('');
       setWarrantyDate('');
@@ -68,6 +71,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       status,
       location,
       asset_tag: assetTag,
+      serial_number: serialNumber || null,
       owner,
       start_date: startDate || null,
       warranty_date: warrantyDate || null
@@ -116,6 +120,19 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
                 onChange={(e) => setAssetTag(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-gray-50/30 font-medium"
                 placeholder="e.g. AST-001"
+              />
+            </div>
+
+            {/* Serial Number */}
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 flex items-center">
+                <Hash className="w-4 h-4 mr-2 text-blue-500" /> Serial Number
+              </label>
+              <input 
+                value={serialNumber}
+                onChange={(e) => setSerialNumber(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all outline-none bg-gray-50/30 font-medium"
+                placeholder="e.g. SN-ABC123456"
               />
             </div>
 

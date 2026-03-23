@@ -291,6 +291,9 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
                     <div>
                       <div className="font-bold text-gray-900">{item.name}</div>
                       <div className="text-[10px] text-gray-400 font-medium uppercase tracking-tighter">ID: #{item.id}</div>
+                      {item.serial_number && (
+                        <div className="text-[10px] text-purple-500 font-mono mt-0.5">S/N: {item.serial_number}</div>
+                      )}
                     </div>
                   </td>
                   <td className="px-4 py-4">

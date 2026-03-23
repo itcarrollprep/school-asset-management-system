@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS items (
     status ENUM('Available', 'Borrow', 'maintenance', 'End of Life', 'Pending Disposal') DEFAULT 'Available',
     location VARCHAR(255),
     asset_tag VARCHAR(100),
+    serial_number VARCHAR(255) DEFAULT NULL,
     owner VARCHAR(255),
     start_date DATE,
     warranty_date DATE,

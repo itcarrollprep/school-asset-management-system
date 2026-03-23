@@ -21,7 +21,7 @@ export default function TopNav({ title = "Assets", user, stats, onNavigate }) {
           onClick={() => onNavigate && onNavigate('assets')}
           className="group flex items-center text-xs font-black bg-gray-50 hover:bg-gray-100 rounded-2xl px-5 py-2 cursor-pointer text-gray-500 border border-gray-100 transition-all hover:scale-105 active:scale-95"
         >
-          INVENTORIES <span className="text-blue-600 ml-2 font-black text-sm">{(stats && stats.total_items) || 0}</span>
+          INVENTORIES <span className="text-blue-600 ml-2 font-black text-sm">{(stats && stats.totalAssets) || 0}</span>
           <ChevronDown className="w-4 h-4 ml-2 text-gray-400 group-hover:text-blue-500 transition-colors" />
         </div>
 
@@ -36,9 +36,9 @@ export default function TopNav({ title = "Assets", user, stats, onNavigate }) {
             className="relative p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-all shadow-sm border border-transparent hover:border-orange-100"
           >
             <Bell className="w-5 h-5" />
-            {stats && stats.in_maintenance > 0 && (
+            {stats && stats.pendingMaintenance > 0 && (
               <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-orange-600 text-[9px] font-black text-white shadow-lg ring-2 ring-white animate-pulse">
-                {stats.in_maintenance}
+                {stats.pendingMaintenance}
               </span>
             )}
           </button>

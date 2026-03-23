@@ -13,11 +13,24 @@ export default function DashboardPage() {
     totalLocations: 0,
     pendingMaintenance: 0
   });
+  const [activity, setActivity] = useState([]);
+  const [alerts, setAlerts] = useState([]);
 
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:4001/api/stats`)
+    const backendUrl = `http://${window.location.hostname}:4001`;
+    fetch(`${backendUrl}/api/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
+      .catch(err => console.error(err));
+      
+    fetch(`${backendUrl}/api/dashboard-activity`)
+      .then(res => res.json())
+      .then(data => setActivity(data))
+      .catch(err => console.error(err));
+      
+    fetch(`${backendUrl}/api/dashboard-alerts`)
+      .then(res => res.json())
+      .then(data => setAlerts(data))
       .catch(err => console.error(err));
   }, []);
 
@@ -79,22 +92,22 @@ export default function DashboardPage() {
             {t('dashboard.activity.title')}
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
-              <div className="w-2 h-2 rounded-full bg-blue-500 mr-4"></div>
-              <div className="flex-1">
-                <div className="text-sm font-bold text-gray-800 underline decoraton-blue-200">{t('dashboard.activity.new_asset')}</div>
-                <div className="text-[11px] text-gray-500">Dell Latitude 5420 was registered to IT Lab</div>
-              </div>
-              <div className="text-[10px] font-mono text-gray-400">2h ago</div>
-            </div>
-            <div className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
-              <div className="w-2 h-2 rounded-full bg-purple-500 mr-4"></div>
-              <div className="flex-1">
-                <div className="text-sm font-bold text-gray-800 underline decoraton-purple-200">{t('dashboard.activity.borrowed')}</div>
-                <div className="text-[11px] text-gray-500">Event Tent checked out by Manager Anne</div>
-              </div>
-              <div className="text-[10px] font-mono text-gray-400">5h ago</div>
-            </div>
+            {activity.length === 0 ? (
+              <div className="text-center py-4 text-gray-500 text-sm">No recent activity</div>
+            ) : (
+              activity.map((act, i) => (
+                <div key={i} className="flex items-center p-3 hover:bg-gray-50 rounded-lg transition">
+                  {/* Tailwind dynamic class workaround by using style for color block, or specific color matching */}
+                  <div className={`w-2 h-2 rounded-full mr-4 ${act.color === 'blue' ? 'bg-blue-500' : 'bg-orange-500'}`}></div>
+                  <div className="flex-1">
+                    <div className={`text-sm font-bold text-gray-800 underline decoration-${act.color === 'blue' ? 'blue' : 'orange'}-200`}>
+                      {act.type}: {act.title}
+                    </div>
+                    <div className="text-[11px] text-gray-500">{act.description}</div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -103,12 +116,35 @@ export default function DashboardPage() {
             <AlertCircle className="w-4 h-4 mr-2 text-orange-400" />
             {t('dashboard.warranty.title')}
           </h3>
-          <div className="text-center py-10">
-            <div className="inline-block p-4 bg-green-50 rounded-full mb-4">
-                <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-            <div className="text-sm font-bold text-gray-900">{t('dashboard.warranty.normal')}</div>
-            <div className="text-xs text-gray-500">{t('dashboard.warranty.no_expiring')}</div>
+          <div className="text-center py-2">
+            {alerts.length === 0 ? (
+              <div className="py-8">
+                <div className="inline-block p-4 bg-green-50 rounded-full mb-4">
+                  <CheckCircle className="w-8 h-8 text-green-500" />
+                </div>
+                <div className="text-sm font-bold text-gray-900">{t('dashboard.warranty.normal') || 'All Good!'}</div>
+                <div className="text-xs text-gray-500">{t('dashboard.warranty.no_expiring') || 'No warranties expiring soon'}</div>
+              </div>
+            ) : (
+              <div className="space-y-3 text-left">
+                {alerts.map((alert, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-100">
+                    <div>
+                      <div className="text-sm font-bold text-red-900">{alert.name}</div>
+                      <div className="text-xs text-red-700 font-mono">{alert.asset_tag || `#${alert.id}`}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-bold text-red-800">
+                        {alert.days_left < 0 ? 'Expired' : `Expiring in ${alert.days_left} days`}
+                      </div>
+                      <div className="text-[10px] text-red-600">
+                        {new Date(alert.warranty_date).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
