@@ -111,7 +111,7 @@ app.post('/api/items', verifyToken, (req, res) => {
   const wDate = warranty_date || null;
 
   const query = 'INSERT INTO items (name, category, status, location, asset_tag, owner, start_date, warranty_date, status_symbol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  pool.query(query, [name, category, initialStatus, location, asset_tag, owner, sDate, wDate, status_symbol], (err, result) => {
+  pool.query(query, [name, category, initialStatus, location, asset_tag, owner, sDate, wDate, status_symbol || 'Circle'], (err, result) => {
     if (err) {
       console.error('Error adding item:', err);
       return res.status(500).json({ error: 'Database error adding item' });
@@ -171,7 +171,7 @@ app.put('/api/items/:id', verifyToken, (req, res) => {
     SET name=?, category=?, status=?, location=?, asset_tag=?, owner=?, start_date=?, warranty_date=?, status_symbol=? 
     WHERE id=? AND is_locked = 0
   `;
-  const params = [name, category, status, location, asset_tag, owner, sDate, wDate, status_symbol, id];
+  const params = [name, category, status, location, asset_tag, owner, sDate, wDate, status_symbol || 'Circle', id];
   
   pool.query(query, params, (err, result) => {
     if (err) {
@@ -387,10 +387,15 @@ app.patch('/api/maintenance/:id/status', verifyToken, (req, res) => {
       if (status === 'Completed') {
         pool.query('UPDATE items SET status = "Available" WHERE id = ?', [item_id], (err3) => {
           if (err3) console.error('Error auto-restoring asset status:', err3);
+          res.json({ message: 'Maintenance status updated successfully', id, status });
+        });
+      } else {
+        // If not completed, ensure asset status is maintenance
+        pool.query('UPDATE items SET status = "maintenance" WHERE id = ?', [item_id], (err3) => {
+          if (err3) console.error('Error auto-syncing asset status to maintenance:', err3);
+          res.json({ message: 'Maintenance status updated successfully', id, status });
         });
       }
-
-      res.json({ message: 'Maintenance status updated successfully', id, status });
     });
   });
 });

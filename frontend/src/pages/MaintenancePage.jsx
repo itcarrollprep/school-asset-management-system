@@ -120,6 +120,7 @@ export default function MaintenancePage() {
           if (data.error) throw new Error(data.error);
           Swal.fire('Success', 'Maintenance scheduled successfully. Asset status updated to "maintenance".', 'success');
           fetchMaintenance();
+          fetchAssets();
         })
         .catch(err => Swal.fire('Error', err.message, 'error'));
       }
@@ -157,6 +158,7 @@ export default function MaintenancePage() {
           if (data.error) throw new Error(data.error);
           Swal.fire('Updated', `Status changed to ${result.value}`, 'success');
           fetchMaintenance();
+          fetchAssets();
         })
         .catch(err => Swal.fire('Error', err.message, 'error'));
       }

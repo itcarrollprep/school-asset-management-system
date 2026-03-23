@@ -26,7 +26,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
 
   const fetchItems = () => {
     setLoading(true);
-    fetch('http://localhost:4001/api/items')
+    fetch(`http://${window.location.hostname}:4001/api/items`)
       .then((res) => res.json())
       .then((data) => {
         setItems(data);
@@ -74,7 +74,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
 
   const handleSaveAsset = (assetData) => {
     const isEdit = !!assetData.id;
-    const url = isEdit ? `http://localhost:4001/api/items/${assetData.id}` : 'http://localhost:4001/api/items';
+    const url = isEdit ? `http://${window.location.hostname}:4001/api/items/${assetData.id}` : `http://${window.location.hostname}:4001/api/items`;
     const method = isEdit ? 'PUT' : 'POST';
 
     const token = localStorage.getItem('auth_token');
@@ -110,7 +110,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
 
   const toggleLock = (id, currentLock) => {
     const token = localStorage.getItem('auth_token');
-    fetch(`http://localhost:4001/api/items/${id}/lock`, {
+    fetch(`http://${window.location.hostname}:4001/api/items/${id}/lock`, {
       method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
     }).then((result) => {
       if (result.isConfirmed) {
         const token = localStorage.getItem('auth_token');
-        fetch(`http://localhost:4001/api/items/${id}`, { 
+        fetch(`http://${window.location.hostname}:4001/api/items/${id}`, { 
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         })

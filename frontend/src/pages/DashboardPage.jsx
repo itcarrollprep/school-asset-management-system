@@ -15,7 +15,7 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    fetch('http://localhost:4001/api/stats')
+    fetch(`http://${window.location.hostname}:4001/api/stats`)
       .then(res => res.json())
       .then(data => setStats(data))
       .catch(err => console.error(err));

@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Wrench, 
-  MapPin, 
-  Users, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  Wrench,
+  MapPin,
+  Users,
+  BarChart3,
   Settings,
   Globe,
   LogOut,
@@ -44,7 +44,7 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
             <Package className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-gray-800 leading-tight">Carrollprep Asset</h1>
+            <h1 className="text-sm font-bold text-gray-800 leading-tight">Carroll Prep Asset</h1>
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Management</p>
             <p className="text-[9px] text-blue-500 font-medium">by IT</p>
           </div>
@@ -54,16 +54,15 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activePage === item.id;
-            
+
             return (
               <button
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  isActive 
-                    ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-50 font-bold' 
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
+                    ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-50 font-bold'
                     : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 font-medium'
-                }`}
+                  }`}
               >
                 <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                 <span className="text-sm">
@@ -86,7 +85,7 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
           <Globe className="w-4 h-4 text-blue-500" />
           <span>{i18n.language.startsWith('en') ? 'ไทย' : 'English'}</span>
         </button>
-        
+
         <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100/50">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-3">
@@ -101,7 +100,7 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
               </div>
             </div>
           </div>
-          <button 
+          <button
             onClick={onLogout}
             className="w-full flex items-center justify-center space-x-2 px-3 py-2 bg-white border border-red-50 text-red-500 rounded-xl hover:bg-red-50 transition-colors text-xs font-bold shadow-sm"
           >
