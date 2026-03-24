@@ -9,6 +9,7 @@ import LocationsPage from './pages/LocationsPage';
 import UsersPage from './pages/UsersPage';
 import SoftwarePage from './pages/SoftwarePage';
 import SettingsPage from './pages/SettingsPage';
+import CategoriesPage from './pages/CategoriesPage';
 import LoginPage from './pages/LoginPage';
 import AssetDetailView from './components/AssetDetailView';
 import { useTranslation } from 'react-i18next';
@@ -111,6 +112,7 @@ function App() {
       case 'assets': return <AssetsPage renderStatus={renderStatus} initialViewAssetId={initialAssetId} />;
       case 'maintenance': return <MaintenancePage />;
       case 'locations': return <LocationsPage />;
+      case 'categories': return <CategoriesPage />;
       case 'people': return <UsersPage />;
       case 'software': return <SoftwarePage />;
       case 'reports': return <div className="p-8"><h1 className="text-2xl font-bold">Reports Page coming soon...</h1></div>;

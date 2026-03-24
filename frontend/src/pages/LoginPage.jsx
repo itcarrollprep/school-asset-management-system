@@ -14,7 +14,7 @@ export default function LoginPage({ onLogin }) {
     try {
       // Use window.location.hostname to support network access
       const backendUrl = `http://${window.location.hostname}:4001`;
-      
+
       const response = await fetch(`${backendUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -60,14 +60,14 @@ export default function LoginPage({ onLogin }) {
           <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
             <ShieldAlert className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Carrollprep</h1>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Carroll Prep</h1>
           <p className="text-slate-500 font-medium mt-2 uppercase text-[10px] tracking-[0.2em]">Asset Management System</p>
         </div>
 
         {/* Login Card */}
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 p-10 border border-slate-100 backdrop-blur-sm relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
-          
+
           <h2 className="text-xl font-bold text-slate-800 mb-8">Sign In</h2>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,7 +78,7 @@ export default function LoginPage({ onLogin }) {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <User className="w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
                 </div>
-                <input 
+                <input
                   required
                   type="text"
                   value={username}
@@ -96,7 +96,7 @@ export default function LoginPage({ onLogin }) {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="w-5 h-5 text-slate-300 group-focus-within:text-blue-500 transition-colors" />
                 </div>
-                <input 
+                <input
                   required
                   type="password"
                   value={password}
@@ -107,7 +107,7 @@ export default function LoginPage({ onLogin }) {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               disabled={loading}
               className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 active:scale-95 transition-all flex items-center justify-center space-x-3 disabled:bg-blue-400 disabled:translate-y-0"
@@ -135,9 +135,9 @@ export default function LoginPage({ onLogin }) {
         <div className="mt-12 text-center text-slate-400">
           <p className="text-xs font-medium">© 2024 Carrollprep Education</p>
           <div className="flex items-center justify-center space-x-4 mt-3">
-             <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-             <p className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Enterprise Security Active</p>
-             <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-300">Enterprise Security Active</p>
+            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
           </div>
         </div>
       </div>

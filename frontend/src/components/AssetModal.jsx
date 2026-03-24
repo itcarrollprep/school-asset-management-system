@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
   const { t } = useTranslation();
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Asset IT');
+  const [categoryId, setCategoryId] = useState('');
   const [status, setStatus] = useState('Available');
   const [location, setLocation] = useState('');
   const [assetTag, setAssetTag] = useState('');
@@ -16,6 +16,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
   
   const [ownersList, setOwnersList] = useState([]);
   const [locationsList, setLocationsList] = useState([]);
+  const [categoriesList, setCategoriesList] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
@@ -36,12 +37,25 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       .then(res => res.json())
       .then(data => setLocationsList(data))
       .catch(err => console.error('Fetch locations error:', err));
+
+    // Fetch categories
+    fetch(`${backendUrl}/api/categories`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setCategoriesList(data);
+        if (!editingItem && data.length > 0) {
+          setCategoryId(data[0].id);
+        }
+      })
+      .catch(err => console.error('Fetch categories error:', err));
   }, []);
 
   useEffect(() => {
     if (editingItem && isOpen) {
       setName(editingItem.name || '');
-      setCategory(editingItem.category || 'Asset IT');
+      setCategoryId(editingItem.category_id || '');
       setStatus(editingItem.status || 'Available');
       setLocation(editingItem.location || '');
       setAssetTag(editingItem.asset_tag || '');
@@ -51,7 +65,7 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       setWarrantyDate(editingItem.warranty_date ? new Date(editingItem.warranty_date).toISOString().split('T')[0] : '');
     } else if (!editingItem) {
       setName('');
-      setCategory('Asset IT');
+      if (categoriesList.length > 0) setCategoryId(categoriesList[0].id);
       setStatus('Available');
       setLocation('');
       setAssetTag('');
@@ -60,14 +74,14 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
       setStartDate('');
       setWarrantyDate('');
     }
-  }, [editingItem, isOpen]);
+  }, [editingItem, isOpen, categoriesList]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave({
       id: editingItem?.id,
       name,
-      category,
+      category_id: categoryId,
       status,
       location,
       asset_tag: assetTag,
@@ -140,16 +154,13 @@ export default function AssetModal({ isOpen, onClose, onSave, editingItem }) {
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700">{t('modal.category')}</label>
               <select 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50/30 font-medium cursor-pointer"
               >
-                <option>Asset IT</option>
-                <option>Asset School</option>
-                <option>Asset Garden</option>
-                <option>Asset Event</option>
-                <option>Asset Office</option>
-                <option>Asset Principal and Director</option>
+                {categoriesList.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
             </div>
 

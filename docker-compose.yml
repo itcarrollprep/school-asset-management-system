@@ -21,6 +21,7 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
+      - CHOKIDAR_USEPOLLING=true
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=rootpassword

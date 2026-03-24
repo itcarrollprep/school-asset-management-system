@@ -9,7 +9,8 @@ import {
   Settings,
   Globe,
   LogOut,
-  MonitorSmartphone
+  MonitorSmartphone,
+  Tag
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -28,6 +29,7 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
     { id: 'assets', label: t('nav.assets'), icon: Package },
     { id: 'maintenance', label: t('nav.maintenance'), icon: Wrench },
     { id: 'locations', label: t('nav.locations'), icon: MapPin },
+    { id: 'categories', label: t('nav.categories'), icon: Tag },
     { id: 'people', label: t('nav.people'), icon: Users },
     { id: 'reports', label: t('nav.reports'), icon: BarChart3 },
     ...(isAdmin ? [

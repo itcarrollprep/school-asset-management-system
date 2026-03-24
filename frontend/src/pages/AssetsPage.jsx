@@ -23,6 +23,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [ownerFilter, setOwnerFilter] = useState('All');
   const [locationFilter, setLocationFilter] = useState('All');
+  const [categoriesList, setCategoriesList] = useState([]);
 
   const fetchItems = () => {
     setLoading(true);
@@ -40,6 +41,10 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
 
   useEffect(() => {
     fetchItems();
+    fetch(`http://${window.location.hostname}:4001/api/categories`)
+      .then(res => res.json())
+      .then(data => setCategoriesList(data))
+      .catch(err => console.error('Fetch categories error:', err));
   }, []);
   
   useEffect(() => {
@@ -203,12 +208,9 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
             className="px-4 py-2 border border-gray-200 rounded text-sm bg-white focus:outline-none focus:border-blue-500 shadow-sm"
           >
             <option value="All">All Categories</option>
-            <option value="Asset IT">Asset IT</option>
-            <option value="Asset School">Asset School</option>
-            <option value="Asset Garden">Asset Garden</option>
-            <option value="Asset Event">Asset Event</option>
-            <option value="Asset Office">Asset Office</option>
-            <option value="Asset Principal and Director">Asset Principal and Director</option>
+            {categoriesList.map(cat => (
+              <option key={cat.id} value={cat.name}>{cat.name}</option>
+            ))}
           </select>
 
           <select 

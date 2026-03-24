@@ -28,10 +28,20 @@ CREATE TABLE IF NOT EXISTS owners (
     email VARCHAR(255)
 );
 
+CREATE TABLE IF NOT EXISTS categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO categories (name) VALUES 
+('Asset IT'), ('Asset School'), ('Asset Garden'), 
+('Asset Event'), ('Asset Office'), ('Asset Principal and Director');
+
 CREATE TABLE IF NOT EXISTS items (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    category ENUM('Asset IT', 'Asset School', 'Asset Garden', 'Asset Event', 'Asset Office', 'Asset Principal and Director') NOT NULL,
+    category_id INT NOT NULL,
     status ENUM('Available', 'Borrow', 'maintenance', 'End of Life', 'Pending Disposal') DEFAULT 'Available',
     location VARCHAR(255),
     asset_tag VARCHAR(100),
@@ -40,7 +50,8 @@ CREATE TABLE IF NOT EXISTS items (
     start_date DATE,
     warranty_date DATE,
     status_symbol VARCHAR(50) DEFAULT 'Circle',
-    is_locked BOOLEAN DEFAULT 0
+    is_locked BOOLEAN DEFAULT 0,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 INSERT INTO locations (name, description) VALUES

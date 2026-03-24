@@ -17,6 +17,10 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.get('/api/debug-test', (req, res) => {
+  res.json({ message: 'Server is running updated code', timestamp: new Date() });
+});
+
 // Database connection pool
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
@@ -79,7 +83,13 @@ const verifyToken = (req, res, next) => {
 
 // GET endpoint to fetch all items
 app.get('/api/items', (req, res) => {
-  pool.query('SELECT * FROM items ORDER BY id DESC', (err, results) => {
+  const query = `
+    SELECT i.*, c.name as category 
+    FROM items i 
+    LEFT JOIN categories c ON i.category_id = c.id 
+    ORDER BY i.id DESC
+  `;
+  pool.query(query, (err, results) => {
     if (err) {
       console.error('Error fetching items:', err);
       return res.status(500).json({ error: 'Database error fetching items' });
@@ -91,7 +101,13 @@ app.get('/api/items', (req, res) => {
 // GET endpoint to fetch a single item by ID
 app.get('/api/items/:id', (req, res) => {
   const { id } = req.params;
-  pool.query('SELECT * FROM items WHERE id = ?', [id], (err, results) => {
+  const query = `
+    SELECT i.*, c.name as category 
+    FROM items i 
+    LEFT JOIN categories c ON i.category_id = c.id 
+    WHERE i.id = ?
+  `;
+  pool.query(query, [id], (err, results) => {
     if (err) {
       console.error('Error fetching item:', err);
       return res.status(500).json({ error: 'Database error' });
@@ -103,20 +119,20 @@ app.get('/api/items/:id', (req, res) => {
 
 // POST endpoint to add a new item
 app.post('/api/items', verifyToken, (req, res) => {
-  const { name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
+  const { name, category_id, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
   const initialStatus = status || 'Available';
   
   // Sanitize dates
   const sDate = start_date || null;
   const wDate = warranty_date || null;
 
-  const query = 'INSERT INTO items (name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-  pool.query(query, [name, category, initialStatus, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle'], (err, result) => {
+  const query = 'INSERT INTO items (name, category_id, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+  pool.query(query, [name, category_id, initialStatus, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle'], (err, result) => {
     if (err) {
       console.error('Error adding item:', err);
       return res.status(500).json({ error: 'Database error adding item' });
     }
-    res.status(201).json({ id: result.insertId, name, category, status: initialStatus, location, asset_tag, serial_number, owner, start_date: sDate, warranty_date: wDate, status_symbol });
+    res.status(201).json({ id: result.insertId, name, category_id, status: initialStatus, location, asset_tag, serial_number, owner, start_date: sDate, warranty_date: wDate, status_symbol });
   });
 });
 
@@ -160,7 +176,7 @@ app.patch('/api/items/:id/status', verifyToken, (req, res) => {
 // PUT endpoint to update entire item
 app.put('/api/items/:id', verifyToken, (req, res) => {
   const { id } = req.params;
-  const { name, category, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
+  const { name, category_id, status, location, asset_tag, serial_number, owner, start_date, warranty_date, status_symbol } = req.body;
   
   // Sanitize dates
   const sDate = start_date || null;
@@ -168,10 +184,10 @@ app.put('/api/items/:id', verifyToken, (req, res) => {
 
   const query = `
     UPDATE items 
-    SET name=?, category=?, status=?, location=?, asset_tag=?, serial_number=?, owner=?, start_date=?, warranty_date=?, status_symbol=? 
+    SET name=?, category_id=?, status=?, location=?, asset_tag=?, serial_number=?, owner=?, start_date=?, warranty_date=?, status_symbol=? 
     WHERE id=? AND is_locked = 0
   `;
-  const params = [name, category, status, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle', id];
+  const params = [name, category_id, status, location, asset_tag, serial_number || null, owner, sDate, wDate, status_symbol || 'Circle', id];
   
   pool.query(query, params, (err, result) => {
     if (err) {
@@ -271,6 +287,66 @@ app.delete('/api/locations/:id', verifyToken, (req, res) => {
     if (err) return res.status(500).json({ error: 'Database error deleting location' });
     if (result.affectedRows === 0) return res.status(404).json({ error: 'Location not found' });
     res.json({ message: 'Location deleted successfully', id });
+  });
+});
+
+// Categories API
+app.get('/api/categories', (req, res) => {
+  const query = `
+    SELECT c.*, 
+    (SELECT COUNT(*) FROM items i WHERE i.category_id = c.id) as asset_count 
+    FROM categories c
+  `;
+  pool.query(query, (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error fetching categories' });
+    res.json(results);
+  });
+});
+
+app.post('/api/categories', verifyToken, (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Category name is required' });
+
+  const query = 'INSERT INTO categories (name) VALUES (?)';
+  pool.query(query, [name], (err, result) => {
+    if (err) {
+      if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'Category name already exists' });
+      return res.status(500).json({ error: 'Database error creating category' });
+    }
+    res.status(201).json({ id: result.insertId, name });
+  });
+});
+
+app.put('/api/categories/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ error: 'Category name is required' });
+
+  pool.query('UPDATE categories SET name=? WHERE id=?', [name, id], (err, result) => {
+    if (err) {
+      if (err.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'Category name already exists' });
+      return res.status(500).json({ error: 'Database error updating category' });
+    }
+    if (result.affectedRows === 0) return res.status(404).json({ error: 'Category not found' });
+    res.json({ message: 'Category updated successfully', id, name });
+  });
+});
+
+app.delete('/api/categories/:id', verifyToken, (req, res) => {
+  const { id } = req.params;
+  
+  // Check if categories are in use
+  pool.query('SELECT COUNT(*) as count FROM items WHERE category_id = ?', [id], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database error' });
+    if (results[0].count > 0) {
+      return res.status(400).json({ error: 'Cannot delete category that is in use by assets' });
+    }
+
+    pool.query('DELETE FROM categories WHERE id = ?', [id], (err2, result) => {
+      if (err2) return res.status(500).json({ error: 'Database error deleting category' });
+      if (result.affectedRows === 0) return res.status(404).json({ error: 'Category not found' });
+      res.json({ message: 'Category deleted successfully', id });
+    });
   });
 });
 

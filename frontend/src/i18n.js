@@ -16,7 +16,8 @@ i18n
             locations: 'Locations',
             people: 'People',
             reports: 'Reports',
-            settings: 'Settings'
+            settings: 'Settings',
+            categories: 'Categories'
           },
           dashboard: {
             title: 'Dashboard Overview',
@@ -107,6 +108,16 @@ i18n
               assets: 'Assigned Assets'
             }
           },
+          categories: {
+            title: 'Asset Categories',
+            subtitle: 'Manage and customize asset classifications',
+            add_button: 'ADD CATEGORY',
+            table: {
+              name: 'Category Name',
+              assets: 'Assets Count',
+              actions: 'Actions'
+            }
+          },
           modal: {
             add_title: 'Add New Record',
             edit_title: 'Edit Record',
@@ -135,7 +146,8 @@ i18n
             locations: 'สถานที่',
             people: 'บุคลากร',
             reports: 'รายงาน',
-            settings: 'ตั้งค่า'
+            settings: 'ตั้งค่า',
+            categories: 'หมวดหมู่'
           },
           dashboard: {
             title: 'ภาพรวมระบบ',
@@ -224,6 +236,16 @@ i18n
               dept: 'แผนก',
               role: 'บทบาท',
               assets: 'สินทรัพย์ที่ถือครอง'
+            }
+          },
+          categories: {
+            title: 'หมวดหมู่สินทรัพย์',
+            subtitle: 'จัดการและปรับแต่งการจัดหมวดหมู่สินทรัพย์',
+            add_button: 'เพิ่มหมวดหมู่',
+            table: {
+              name: 'ชื่อหมวดหมู่',
+              assets: 'จำนวนสินทรัพย์',
+              actions: 'จัดการ'
             }
           },
           modal: {
