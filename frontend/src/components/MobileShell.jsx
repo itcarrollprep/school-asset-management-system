@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Wrench, 
-  MapPin, 
-  Users, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  Package,
+  Wrench,
+  MapPin,
+  Users,
+  BarChart3,
   Settings,
   Globe,
   Bell,
@@ -42,13 +42,12 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden font-sans text-sm">
       {/* Top Header */}
       <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-md shadow-blue-100">
-            <Package className="w-5 h-5 text-white" />
-          </div>
+        <div>
+          <img src="/logo.png" alt="Company Logo" className="w-10 mx-auto" />
+
           <span className="font-bold text-gray-800 tracking-tight text-xs uppercase">Carrollprep</span>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <button className="relative text-gray-500 p-1.5 hover:bg-gray-50 rounded-full transition-colors">
             <Bell className="w-5 h-5" />
@@ -77,9 +76,8 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`flex flex-col items-center justify-center space-y-1 w-16 h-full transition-all duration-200 ${
-                isActive ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className={`flex flex-col items-center justify-center space-y-1 w-16 h-full transition-all duration-200 ${isActive ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'
+                }`}
             >
               <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''}`} />
               <span className={`text-[10px] font-bold ${isActive ? 'opacity-100' : 'opacity-80'}`}>
@@ -91,12 +89,11 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
             </button>
           );
         })}
-        
+
         <button
           onClick={() => setIsMenuOpen(true)}
-          className={`flex flex-col items-center justify-center space-y-1 w-16 h-full ${
-            moreItems.some(i => i.id === activePage) ? 'text-blue-600' : 'text-gray-400'
-          }`}
+          className={`flex flex-col items-center justify-center space-y-1 w-16 h-full ${moreItems.some(i => i.id === activePage) ? 'text-blue-600' : 'text-gray-400'
+            }`}
         >
           <Menu className="w-5 h-5" />
           <span className="text-[10px] font-bold opacity-80">{t('nav.more') || 'More'}</span>
@@ -112,7 +109,7 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
               <X className="w-5 h-5" />
             </button>
           </header>
-          
+
           <div className="flex-1 overflow-y-auto px-4 py-6">
             <div className="mb-8">
               <div className="flex items-center space-x-4 mb-6">
@@ -140,9 +137,8 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
                       onNavigate(item.id);
                       setIsMenuOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
-                      isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-600'
-                    }`}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isActive ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-50 text-gray-600'
+                      }`}
                   >
                     <div className="flex items-center space-x-3">
                       <Icon className="w-5 h-5" />
@@ -180,7 +176,7 @@ export default function MobileShell({ activePage, onNavigate, children, title, u
               </button>
             </div>
           </div>
-          
+
           <div className="p-6 bg-gray-50 text-center">
             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Carrollprep Asset Management</p>
             <p className="text-[10px] text-blue-500 font-medium mt-1">Version 1.0.0</p>

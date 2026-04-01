@@ -116,6 +116,17 @@ export default function AssetDetailView({ assetId }) {
                 </div>
               </div>
 
+              {/* Status */}
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center">
+                  <Package className="w-5 h-5 text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</p>
+                  <p className="text-gray-800 font-bold">{asset.status || 'Unknown'}</p>
+                </div>
+              </div>
+
               {/* Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">

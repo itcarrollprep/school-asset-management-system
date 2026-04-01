@@ -57,8 +57,8 @@ export default function LoginPage({ onLogin }) {
       <div className="w-full max-w-md">
         {/* Logo / Branding Area */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-6 rotate-3 hover:rotate-0 transition-transform duration-300">
-            <ShieldAlert className="w-10 h-10 text-white" />
+          <div>
+            <img src="/logo.png" alt="Logo" className="w-20 mx-auto" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">Carroll Prep</h1>
           <p className="text-slate-500 font-medium mt-2 uppercase text-[10px] tracking-[0.2em]">Asset Management System</p>

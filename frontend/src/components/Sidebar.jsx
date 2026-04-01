@@ -42,8 +42,8 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
     <div className="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 shadow-sm overflow-y-auto">
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-8">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
-            <Package className="w-6 h-6 text-white" />
+          <div>
+            <img src="/logo.png" alt="Logo" className="w-10 mx-auto mb-6" />
           </div>
           <div>
             <h1 className="text-sm font-bold text-gray-800 leading-tight">Carroll Prep Asset</h1>
@@ -62,8 +62,8 @@ export default function Sidebar({ activePage, onNavigate, user, onLogout }) {
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive
-                    ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-50 font-bold'
-                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 font-medium'
+                  ? 'bg-blue-50 text-blue-600 shadow-sm shadow-blue-50 font-bold'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700 font-medium'
                   }`}
               >
                 <Icon className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />

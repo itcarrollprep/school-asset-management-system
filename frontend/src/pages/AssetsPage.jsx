@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus, RotateCcw, Search, Trash2, User, Calendar, Shield, Monitor, 
   Microscope, Tent, Wrench as Tool, Circle, Layout as ChairIcon,
-  Lock, Unlock, Edit2, MapPin
+  Lock, Unlock, Edit2, MapPin, Download
 } from 'lucide-react';
 import AssetModal from '../components/AssetModal';
 import { useTranslation } from 'react-i18next';
@@ -163,6 +163,44 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
     });
   };
 
+  const handleExportCSV = () => {
+    if (filteredItems.length === 0) {
+      Swal.fire({ icon: 'info', title: 'No Data', text: 'There are no items to export.' });
+      return;
+    }
+    
+    const headers = ['ID', 'Asset Tag', 'Name', 'Serial Number', 'Category', 'Status', 'Owner', 'Location', 'Acquired Date', 'Warranty Date'];
+    
+    const escapeCsv = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val);
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const csvRows = filteredItems.map(item => [
+      escapeCsv(item.id),
+      escapeCsv(item.asset_tag),
+      escapeCsv(item.name),
+      escapeCsv(item.serial_number),
+      escapeCsv(item.category),
+      escapeCsv(translateStatus(item.status) || item.status),
+      escapeCsv(item.owner),
+      escapeCsv(item.location),
+      escapeCsv(item.start_date ? new Date(item.start_date).toLocaleDateString() : ''),
+      escapeCsv(item.warranty_date ? new Date(item.warranty_date).toLocaleDateString() : '')
+    ].join(','));
+    
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `assets_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const translateStatus = (status) => {
     const map = {
       'Available': t('assets.status.available'),
@@ -251,18 +289,28 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
           </button>
         </div>
 
-        {!isViewer && (
+        <div className="flex items-center gap-3">
           <button 
-            onClick={() => {
-              setEditingItem(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg transition transform hover:scale-105 active:scale-95 whitespace-nowrap uppercase tracking-wide"
+            onClick={handleExportCSV}
+            className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-lg transition transform hover:scale-105 active:scale-95 whitespace-nowrap uppercase tracking-wide text-sm"
+            title="Export to CSV (Excel format)"
           >
-            <Plus className="w-5 h-5 mr-2" />
-            {t('assets.add_button')}
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
           </button>
-        )}
+          {!isViewer && (
+            <button 
+              onClick={() => {
+                setEditingItem(null);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg transition transform hover:scale-105 active:scale-95 whitespace-nowrap uppercase tracking-wide"
+            >
+              <Plus className="w-5 h-5 mr-2" />
+              {t('assets.add_button')}
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-xl">
@@ -306,7 +354,7 @@ export default function AssetsPage({ renderStatus, initialViewAssetId }) {
                         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(fullUrl)}`;
                         Swal.fire({
                           title: item.name,
-                          text: `ID: ${item.id} - ${item.asset_tag || ''}`,
+                          text: `ID: ${item.id} - ${item.asset_tag || ''} | Status: ${translateStatus(item.status)}`,
                           imageUrl: qrUrl,
                           imageWidth: 300,
                           imageHeight: 300,
